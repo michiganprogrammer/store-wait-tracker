@@ -64,19 +64,28 @@ const STORES = ['9814'];
 const LOG_FILE = 'wait_times.csv';
 const TZ = 'America/Detroit';
 
-function getDayAndHour(date) {
-  const day = new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'long' }).format(date);
-  const hour = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: '2-digit', hour12: false }).format(date);
-  // Strip leading zero, "09" -> "9"
-  return { day, hour: parseInt(hour, 10) };
+function getDateParts(date) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ,
+    weekday: 'long',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(date);
+
+  const get = (type) => parts.find(p => p.type === type).value;
+  const day = get('weekday');
+  const dateStr = `${get('year')}-${get('month')}-${get('day')}`;
+  let hour = get('hour');
+  if (hour === '24') hour = '00'; // handle midnight edge case
+  const time = `${hour}:${get('minute')}`;
+  return { day, date: dateStr, time };
 }
 
 (async () => {
   try {
     const data = await getWaitTimes(STORES);
     const now = new Date();
-    const timestamp = now.toISOString();
-    const { day, hour } = getDayAndHour(now);
+    const { day, date, time } = getDateParts(now);
 
     let stores = Array.isArray(data) ? data
                : Array.isArray(data?.stores) ? data.stores
@@ -96,10 +105,10 @@ function getDayAndHour(date) {
     }
 
     if (!fs.existsSync(LOG_FILE)) {
-      fs.writeFileSync(LOG_FILE, `timestamp,day,hour,${STORES.join(',')}\n`);
+      fs.writeFileSync(LOG_FILE, `day,date,time,${STORES.join(',')}\n`);
     }
 
-    const row = `${timestamp},${day},${hour},${STORES.map(num => lookup[num] ?? '').join(',')}\n`;
+    const row = `${day},${date},${time},${STORES.map(num => lookup[num] ?? '').join(',')}\n`;
     fs.appendFileSync(LOG_FILE, row);
 
     console.log(`Logged: ${row.trim()}`);
