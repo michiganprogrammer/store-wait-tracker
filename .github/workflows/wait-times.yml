@@ -2,10 +2,9 @@ name: Log Store Wait Times
 
 on:
   schedule:
-    # Every 5 min, 13:00–23:55 UTC = 9am–7:55pm EDT (summer)
-    # In winter (EST), this becomes 8am–6:55pm. Adjust if needed.
     - cron: '*/5 13-23 * * *'
   workflow_dispatch:
+
 
 permissions:
   contents: write
