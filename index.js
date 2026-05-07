@@ -62,11 +62,21 @@ async function getWaitTimes(storeNumbers) {
 // --- Main ---
 const STORES = ['9814'];
 const LOG_FILE = 'wait_times.csv';
+const TZ = 'America/Detroit';
+
+function getDayAndHour(date) {
+  const day = new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'long' }).format(date);
+  const hour = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: '2-digit', hour12: false }).format(date);
+  // Strip leading zero, "09" -> "9"
+  return { day, hour: parseInt(hour, 10) };
+}
 
 (async () => {
   try {
     const data = await getWaitTimes(STORES);
-    const timestamp = new Date().toISOString();
+    const now = new Date();
+    const timestamp = now.toISOString();
+    const { day, hour } = getDayAndHour(now);
 
     let stores = Array.isArray(data) ? data
                : Array.isArray(data?.stores) ? data.stores
@@ -80,22 +90,19 @@ const LOG_FILE = 'wait_times.csv';
       throw new Error('Could not find store array in response.');
     }
 
-    // Build lookup: storeNumber -> estimatedWaitMinutes
     const lookup = {};
     for (const s of stores) {
       lookup[s.storeNumber] = s.estimatedWaitMinutes ?? '';
     }
 
-    // Create header (timestamp + store numbers as columns) if file doesn't exist
     if (!fs.existsSync(LOG_FILE)) {
-      fs.writeFileSync(LOG_FILE, `timestamp,${STORES.join(',')}\n`);
+      fs.writeFileSync(LOG_FILE, `timestamp,day,hour,${STORES.join(',')}\n`);
     }
 
-    // Build row in same order as STORES
-    const row = `${timestamp},${STORES.map(num => lookup[num] ?? '').join(',')}\n`;
+    const row = `${timestamp},${day},${hour},${STORES.map(num => lookup[num] ?? '').join(',')}\n`;
     fs.appendFileSync(LOG_FILE, row);
 
-    console.log(`Logged at ${timestamp}: ${row.trim()}`);
+    console.log(`Logged: ${row.trim()}`);
   } catch (err) {
     console.error('Error:', err);
     process.exit(1);
