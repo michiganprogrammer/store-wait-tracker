@@ -68,10 +68,6 @@ const LOG_FILE = 'wait_times.csv';
     const data = await getWaitTimes(STORES);
     const timestamp = new Date().toISOString();
 
-    // Debug: print raw response so we can see structure
-    console.log('Raw response:', JSON.stringify(data, null, 2));
-
-    // Try to find the array of stores in common response shapes
     let stores = Array.isArray(data) ? data
                : Array.isArray(data?.stores) ? data.stores
                : Array.isArray(data?.data) ? data.data
@@ -80,20 +76,26 @@ const LOG_FILE = 'wait_times.csv';
                : null;
 
     if (!stores) {
-      throw new Error('Could not find store array in response. See raw response above.');
+      console.log('Raw response:', JSON.stringify(data, null, 2));
+      throw new Error('Could not find store array in response.');
     }
 
-    // Create CSV header if file doesn't exist
+    // Build lookup: storeNumber -> estimatedWaitMinutes
+    const lookup = {};
+    for (const s of stores) {
+      lookup[s.storeNumber] = s.estimatedWaitMinutes ?? '';
+    }
+
+    // Create header (timestamp + store numbers as columns) if file doesn't exist
     if (!fs.existsSync(LOG_FILE)) {
-      fs.writeFileSync(LOG_FILE, 'timestamp,storeNumber,waitTime,raw\n');
+      fs.writeFileSync(LOG_FILE, `timestamp,${STORES.join(',')}\n`);
     }
 
-    const rows = stores.map(entry =>
-      `${timestamp},${entry.storeNumber ?? ''},${entry.waitTime ?? ''},"${JSON.stringify(entry).replaceAll('"', '""')}"`
-    ).join('\n') + '\n';
+    // Build row in same order as STORES
+    const row = `${timestamp},${STORES.map(num => lookup[num] ?? '').join(',')}\n`;
+    fs.appendFileSync(LOG_FILE, row);
 
-    fs.appendFileSync(LOG_FILE, rows);
-    console.log(`Logged ${stores.length} stores at ${timestamp}`);
+    console.log(`Logged at ${timestamp}: ${row.trim()}`);
   } catch (err) {
     console.error('Error:', err);
     process.exit(1);
