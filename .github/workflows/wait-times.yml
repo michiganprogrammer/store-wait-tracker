@@ -2,7 +2,7 @@ name: Log Store Wait Times
 
 on:
   schedule:
-    - cron: '*/5 13-23 * * *'
+- cron: '*/5 14-23 * * *'   # 9am-6:55pm EST / 10am-7:55pm EDT
   workflow_dispatch:
 
 
