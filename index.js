@@ -60,7 +60,7 @@ async function getWaitTimes(storeNumbers) {
 }
 
 // --- Main ---
-const STORES = ['9814', '9130', '1182', '1734', '1729', '1742', '1735', '1994', '3824', '9082'];
+const STORES = ['9814'];
 const LOG_FILE = 'wait_times.csv';
 
 (async () => {
