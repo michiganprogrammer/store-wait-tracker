@@ -9,3 +9,4 @@ timestamp,storeNumber,waitTime,raw
 2026-05-07T16:13:50.290Z,9082,,"{""storeNumber"":""9082"",""storeName"":""Livonia Marketplace"",""estimatedWaitMinutes"":1,""stateFlags"":0,""ociSalonStateCode"":0,""ociSalonStateDescription"":""ActiveOci""}"
 2026-05-07T16:13:50.290Z,9130,,"{""storeNumber"":""9130"",""storeName"":""Garrison Place"",""estimatedWaitMinutes"":0,""stateFlags"":0,""ociSalonStateCode"":0,""ociSalonStateDescription"":""ActiveOci""}"
 2026-05-07T16:13:50.290Z,9814,,"{""storeNumber"":""9814"",""storeName"":""Fairlane Green"",""estimatedWaitMinutes"":0,""stateFlags"":0,""ociSalonStateCode"":0,""ociSalonStateDescription"":""ActiveOci""}"
+2026-05-07T16:24:08.190Z,9814,,"{""storeNumber"":""9814"",""storeName"":""Fairlane Green"",""estimatedWaitMinutes"":0,""stateFlags"":0,""ociSalonStateCode"":0,""ociSalonStateDescription"":""ActiveOci""}"
