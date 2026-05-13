@@ -60,7 +60,15 @@ async function getWaitTimes(storeNumbers) {
 }
 
 // --- Main ---
-const STORES = ['9814'];
+// Updated with all salon numbers from the dearborn.json file
+const STORES = [
+  '9814', '9130', '1182', '1734', '1729', '1742', '1735', '1994', '3824', '9082',
+  '8687', '1728', '7737', '0571', '9135', '9077', '9789', '9487', '3621', '2375',
+  '9896', '1743', '2683', '1736', '1739', '9008', '9786', '1750', '9092', '3346',
+  '9087', '0934', '1727', '7066', '9012', '9094', '9879', '2373', '1744', '8974',
+  '1762', '1732', '9138', '9423', '9080', '9817', '3000', '8773', '9476', '9888'
+];
+
 const LOG_FILE = 'wait_times.csv';
 const TZ = 'America/Detroit';
 
@@ -76,7 +84,7 @@ function getDateParts(date) {
   const day = get('weekday');
   const dateStr = `${get('year')}-${get('month')}-${get('day')}`;
   let hour = get('hour');
-  if (hour === '24') hour = '00'; // handle midnight edge case
+  if (hour === '24') hour = '00'; 
   const time = `${hour}:${get('minute')}`;
   return { day, date: dateStr, time };
 }
@@ -104,14 +112,16 @@ function getDateParts(date) {
       lookup[s.storeNumber] = s.estimatedWaitMinutes ?? '';
     }
 
+    // Create file and header if it doesn't exist
     if (!fs.existsSync(LOG_FILE)) {
       fs.writeFileSync(LOG_FILE, `day,date,time,${STORES.join(',')}\n`);
     }
 
+    // Map each store in our STORES array to its wait time found in the API response
     const row = `${day},${date},${time},${STORES.map(num => lookup[num] ?? '').join(',')}\n`;
     fs.appendFileSync(LOG_FILE, row);
 
-    console.log(`Logged: ${row.trim()}`);
+    console.log(`Logged wait times for ${STORES.length} stores at ${time}`);
   } catch (err) {
     console.error('Error:', err);
     process.exit(1);
